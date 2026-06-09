@@ -76,7 +76,7 @@ export default function ProviderProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-secondary-50">
+      <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-12 space-y-6">
           <div className="h-48 bg-secondary-200 rounded-2xl animate-pulse" />
@@ -89,7 +89,7 @@ export default function ProviderProfilePage() {
 
   if (!provider || provider.status !== "Approved") {
     return (
-      <div className="min-h-screen bg-secondary-50">
+      <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-24 text-center">
           <h1 className="text-2xl font-bold text-secondary-700">Provider not found</h1>
@@ -105,7 +105,7 @@ export default function ProviderProfilePage() {
   const trustScore = provider.trustScore || Math.min(95, 70 + (provider.reviewCount || 0) * 2);
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -210,7 +210,7 @@ export default function ProviderProfilePage() {
                   ) : (
                     <div className="space-y-4">
                       {reviews.map(review => (
-                        <div key={review.id} className="p-4 bg-secondary-50 rounded-xl">
+                        <div key={review.id} className="p-4 bg-white rounded-xl">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold text-secondary-900">{review.customerName}</span>
                             <div className="flex items-center gap-1">
@@ -235,7 +235,7 @@ export default function ProviderProfilePage() {
               <Card className="sticky top-28">
                 <CardContent className="p-6 space-y-4">
                   {provider.hourlyRate && (
-                    <div className="text-center py-3 bg-secondary-50 rounded-xl">
+                    <div className="text-center py-3 bg-white rounded-xl">
                       <p className="text-secondary-500 text-sm">Starting from</p>
                       <p className="text-3xl font-bold text-primary-700">${provider.hourlyRate}<span className="text-base font-medium text-secondary-500">/hr</span></p>
                     </div>

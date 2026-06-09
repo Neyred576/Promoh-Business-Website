@@ -325,7 +325,7 @@ export default function Home() {
               ))}
             </div>
           ) : featuredProviders.length === 0 ? (
-            <div className="text-center py-20 border-2 border-dashed border-secondary-200 rounded-2xl bg-secondary-50">
+            <div className="text-center py-20 border-2 border-dashed border-secondary-200 rounded-2xl bg-white">
               <ShieldCheck className="w-12 h-12 text-secondary-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-secondary-500">No featured providers yet</h3>
             </div>

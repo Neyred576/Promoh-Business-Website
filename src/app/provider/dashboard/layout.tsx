@@ -36,7 +36,7 @@ export default function ProviderDashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-white flex flex-col md:flex-row">
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-secondary-900 text-white flex flex-col">
         <div className="h-20 flex items-center px-6 border-b border-secondary-800">

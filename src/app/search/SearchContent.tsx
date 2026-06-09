@@ -117,14 +117,14 @@ export default function SearchContent() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
 
       {/* Search Header Bar */}
       <div className="bg-white border-b sticky top-20 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row gap-3">
-            <div className="flex-1 relative flex items-center bg-secondary-50 rounded-xl border border-secondary-200 hover:border-primary-400 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all">
+            <div className="flex-1 relative flex items-center bg-white rounded-xl border border-secondary-200 hover:border-primary-400 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all">
               <Search className="absolute left-4 w-5 h-5 text-secondary-400 pointer-events-none" />
               <Input
                 value={searchQuery}
@@ -134,7 +134,7 @@ export default function SearchContent() {
                 className="border-0 shadow-none focus-visible:ring-0 pl-12 bg-transparent h-12"
               />
             </div>
-            <div className="flex-1 relative flex items-center bg-secondary-50 rounded-xl border border-secondary-200 hover:border-primary-400 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all">
+            <div className="flex-1 relative flex items-center bg-white rounded-xl border border-secondary-200 hover:border-primary-400 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all">
               <MapPin className="absolute left-4 w-5 h-5 text-secondary-400 pointer-events-none" />
               <Input
                 value={locationQuery}
@@ -198,7 +198,7 @@ export default function SearchContent() {
               <div className="space-y-1">
                 {CATEGORIES.map(cat => (
                   <button key={cat.slug} onClick={() => handleCategoryClick(cat.slug)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${selectedCategory === cat.slug ? "bg-primary-50 text-primary-700 border border-primary-200" : "hover:bg-secondary-50 text-secondary-700"}`}>
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${selectedCategory === cat.slug ? "bg-primary-50 text-primary-700 border border-primary-200" : "hover:bg-white text-secondary-700"}`}>
                     {cat.icon && <span className="text-secondary-400">{cat.icon}</span>}
                     {cat.name}
                   </button>

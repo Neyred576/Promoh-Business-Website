@@ -85,10 +85,10 @@ function ChatPageContent() {
     return () => unsub();
   }, [user, activeChatId, providerParam]);
 
-  if (loading || !user) return <div className="min-h-screen bg-secondary-50" />;
+  if (loading || !user) return <div className="min-h-screen bg-white" />;
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
       
       <div className="flex-1 max-w-6xl w-full mx-auto p-4 flex gap-6 h-[calc(100vh-64px)]">
@@ -107,7 +107,7 @@ function ChatPageContent() {
                   key={chat.id}
                   onClick={() => setActiveChatId(chat.id)}
                   className={`w-full text-left p-3 rounded-xl transition-colors ${
-                    activeChatId === chat.id ? "bg-primary-50 border border-primary-200" : "hover:bg-secondary-50 border border-transparent"
+                    activeChatId === chat.id ? "bg-primary-50 border border-primary-200" : "hover:bg-white border border-transparent"
                   }`}
                 >
                   <div className="font-semibold text-secondary-900 truncate">{chat.otherName}</div>
@@ -136,7 +136,7 @@ function ChatPageContent() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-secondary-50 flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>}>
       <ChatPageContent />
     </Suspense>
   );

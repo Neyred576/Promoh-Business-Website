@@ -51,7 +51,7 @@ export default function AdminDashboardLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-white flex flex-col md:flex-row">
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-indigo-950 text-white flex flex-col shadow-xl z-10 md:min-h-screen">
         <div className="h-20 flex items-center px-6 border-b border-indigo-900">

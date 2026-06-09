@@ -132,73 +132,73 @@ export default function ProviderRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary-900 p-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4 py-12">
       <div className="w-full max-w-2xl">
         <div className="flex justify-center mb-8">
-          <Link href="/"><Image src="/logo.png" alt="Promoh" width={56} height={56} className="w-auto h-12 brightness-0 invert" /></Link>
+          <Link href="/"><Image src="/logo.png" alt="Promoh" width={56} height={56} className="w-auto h-12 " /></Link>
         </div>
-        <Card className="bg-secondary-800 border-secondary-700 text-secondary-50">
+        <Card className="bg-white border-secondary-200 text-secondary-900 shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-white">Apply as a Service Provider</CardTitle>
-            <CardDescription className="text-secondary-400">Join thousands of verified professionals on Promoh</CardDescription>
+            <CardTitle className="text-2xl text-secondary-900">Apply as a Service Provider</CardTitle>
+            <CardDescription className="text-secondary-500">Join thousands of verified professionals on Promoh</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
-              {error && <div className="p-3 bg-red-900/50 text-red-200 text-sm rounded-xl border border-red-800">{error}</div>}
+              {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-200">{error}</div>}
 
               <div className="dark-input">
-                <label className="text-sm font-medium text-secondary-300 block mb-1">Business / Trading Name</label>
+                <label className="text-sm font-medium text-secondary-700 block mb-1">Business / Trading Name</label>
                 <Input value={form.businessName} onChange={set("businessName")} required placeholder="e.g. John's Electrical Services"
-                  className="bg-secondary-900 border-secondary-700 text-white placeholder:text-secondary-600 focus-visible:ring-primary-500" />
+                  className="bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-secondary-300 block mb-1">First Name</label>
+                  <label className="text-sm font-medium text-secondary-700 block mb-1">First Name</label>
                   <Input value={form.firstName} onChange={set("firstName")} required placeholder="John"
-                    className="bg-secondary-900 border-secondary-700 text-white placeholder:text-secondary-600 focus-visible:ring-primary-500" />
+                    className="bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-secondary-300 block mb-1">Last Name</label>
+                  <label className="text-sm font-medium text-secondary-700 block mb-1">Last Name</label>
                   <Input value={form.lastName} onChange={set("lastName")} required placeholder="Doe"
-                    className="bg-secondary-900 border-secondary-700 text-white placeholder:text-secondary-600 focus-visible:ring-primary-500" />
+                    className="bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500" />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-secondary-300 block mb-1">Email Address</label>
+                <label className="text-sm font-medium text-secondary-700 block mb-1">Email Address</label>
                 <Input type="email" value={form.email} onChange={set("email")} required placeholder="contact@yourbusiness.com"
-                  className="bg-secondary-900 border-secondary-700 text-white placeholder:text-secondary-600 focus-visible:ring-primary-500" />
+                  className="bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500" />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-secondary-300 block mb-1">Phone Number</label>
+                <label className="text-sm font-medium text-secondary-700 block mb-1">Phone Number</label>
                 <div className="flex gap-2">
-                  <div className="flex h-12 items-center justify-center rounded-xl border bg-secondary-900 border-secondary-700 text-white px-3 text-sm">
+                  <div className="flex h-12 items-center justify-center rounded-xl border bg-white border-secondary-300 text-secondary-900 px-3 text-sm">
                     {COUNTRIES.find(c => c.code === form.country)?.dialCode || "+1"}
                   </div>
                   <Input type="tel" value={form.phone} onChange={set("phone")} required placeholder="555 000 0000"
-                    className="bg-secondary-900 border-secondary-700 text-white placeholder:text-secondary-600 focus-visible:ring-primary-500" />
+                    className="bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-secondary-300 block mb-1">Country</label>
+                  <label className="text-sm font-medium text-secondary-700 block mb-1">Country</label>
                   <select value={form.country} onChange={set("country")} required
                     className="flex h-12 w-full rounded-xl border bg-secondary-900 border-secondary-700 text-white px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                     {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-secondary-300 block mb-1">City</label>
+                  <label className="text-sm font-medium text-secondary-700 block mb-1">City</label>
                   <Input value={form.city} onChange={set("city")} required placeholder="Your City"
-                    className="bg-secondary-900 border-secondary-700 text-white placeholder:text-secondary-600 focus-visible:ring-primary-500" />
+                    className="bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500" />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-secondary-300 block mb-1">Service Category</label>
+                <label className="text-sm font-medium text-secondary-700 block mb-1">Service Category</label>
                 <select value={form.serviceCategory} onChange={set("serviceCategory")} required
                   className="flex h-12 w-full rounded-xl border bg-secondary-900 border-secondary-700 text-white px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                   <option value="">Select your primary service</option>
@@ -207,11 +207,11 @@ export default function ProviderRegisterPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-secondary-300 block mb-1">Password</label>
+                <label className="text-sm font-medium text-secondary-700 block mb-1">Password</label>
                 <div className="relative">
                   <Input type={showPw ? "text" : "password"} value={form.password} onChange={set("password")} required
                     className="bg-secondary-900 border-secondary-700 text-white focus-visible:ring-primary-500 pr-12" />
-                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-400">
+                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-500">
                     {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
@@ -230,7 +230,7 @@ export default function ProviderRegisterPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-secondary-300 block mb-1">Confirm Password</label>
+                <label className="text-sm font-medium text-secondary-700 block mb-1">Confirm Password</label>
                 <Input type="password" value={form.confirmPassword} onChange={set("confirmPassword")} required
                   className="bg-secondary-900 border-secondary-700 text-white focus-visible:ring-primary-500" />
               </div>
@@ -239,8 +239,8 @@ export default function ProviderRegisterPage() {
                 Submit Application
               </Button>
             </form>
-            <p className="text-center mt-4 text-sm text-secondary-400">
-              Already registered? <Link href="/provider/login" className="text-primary-400 font-medium hover:underline">Log in</Link>
+            <p className="text-center mt-4 text-sm text-secondary-500">
+              Already registered? <Link href="/provider/login" className="text-primary-600 font-medium hover:underline">Log in</Link>
             </p>
           </CardContent>
         </Card>

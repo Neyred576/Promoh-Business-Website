@@ -54,7 +54,7 @@ export default function Notifications() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-secondary-200 z-50 overflow-hidden">
-            <div className="flex items-center justify-between p-3 border-b border-secondary-100 bg-secondary-50">
+            <div className="flex items-center justify-between p-3 border-b border-secondary-100 bg-white">
               <h3 className="font-bold text-secondary-900">Notifications</h3>
               {unreadCount > 0 && (
                 <button onClick={markAllRead} className="text-xs text-primary-600 hover:text-primary-700 font-medium">
@@ -74,7 +74,7 @@ export default function Notifications() {
                       if (!n.read) updateDoc(doc(db, "notifications", n.id), { read: true });
                       setIsOpen(false);
                     }}
-                    className={`block p-4 border-b border-secondary-50 hover:bg-secondary-50 transition-colors ${
+                    className={`block p-4 border-b border-secondary-50 hover:bg-white transition-colors ${
                       !n.read ? "bg-primary-50/50" : ""
                     }`}
                   >

@@ -94,7 +94,7 @@ export default function CustomerRegisterPage() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary-50 p-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4 py-12">
       <div className="w-full max-w-lg">
         <div className="flex justify-center mb-8">
           <Link href="/"><Image src="/logo.png" alt="Promoh" width={56} height={56} className="w-auto h-12" /></Link>

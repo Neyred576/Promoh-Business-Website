@@ -63,13 +63,13 @@ export default function CustomerDashboard() {
   const handleSignOut = async () => { await signOut(); router.push("/"); };
 
   if (loading || !user) return (
-    <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-white">
       {/* Customer Nav */}
       <nav className="bg-white border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">

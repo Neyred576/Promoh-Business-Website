@@ -368,7 +368,7 @@ export default function AdminDashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {pendingProviders.map(p => (
-                    <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-secondary-200 bg-secondary-50 flex-wrap gap-3">
+                    <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-secondary-200 bg-white flex-wrap gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-secondary-900 truncate">
                           {p.businessName || `${p.firstName} ${p.lastName}`}
@@ -416,7 +416,7 @@ export default function AdminDashboardPage() {
                 .sort((a, b) => b.time - a.time)
                 .slice(0, 10)
                 .map((act, i) => (
-                  <div key={i} className="flex items-start gap-3 text-sm p-3 rounded-xl bg-secondary-50 border border-secondary-100">
+                  <div key={i} className="flex items-start gap-3 text-sm p-3 rounded-xl bg-white border border-secondary-100">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                       act.type === 'provider' ? 'bg-indigo-100 text-indigo-600' :
                       act.type === 'customer' ? 'bg-blue-100 text-blue-600' :
@@ -502,7 +502,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {allBookings.map(b => (
-                  <div key={b.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 bg-secondary-50 hover:bg-white transition-colors">
+                  <div key={b.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 bg-white hover:bg-white transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-secondary-900 flex gap-2 items-center">
                         Booking from <span className="font-bold">{b.customerName}</span>
@@ -541,7 +541,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {allProviders.map(p => (
-                  <div key={p.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 hover:bg-secondary-50 transition-colors flex-wrap">
+                  <div key={p.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 hover:bg-white transition-colors flex-wrap">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-indigo-400 flex items-center justify-center text-white font-bold shrink-0">
                       {(p.businessName || p.firstName || "?")[0].toUpperCase()}
                     </div>
@@ -608,7 +608,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-2">
                 {allCustomers.map(c => (
-                  <div key={c.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 hover:bg-secondary-50 transition-colors">
+                  <div key={c.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 hover:bg-white transition-colors">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
                       {(c.firstName || c.email || "?")[0].toUpperCase()}
                     </div>
@@ -639,7 +639,7 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {["Electricians","Plumbers","Cleaners","Tutors","Photographers","Mechanics","Carpenters","Painters","Movers","Beauty Professionals","IT Specialists","Home Repair"].map(cat => (
-                <div key={cat} className="flex items-center justify-between p-3 rounded-xl border border-secondary-200 bg-secondary-50">
+                <div key={cat} className="flex items-center justify-between p-3 rounded-xl border border-secondary-200 bg-white">
                   <span className="font-medium text-sm text-secondary-800">{cat}</span>
                   <CheckCircle className="w-4 h-4 text-green-500" />
                 </div>
@@ -783,7 +783,7 @@ export default function AdminDashboardPage() {
                     <span className="text-secondary-400 text-sm italic">Empty. Add categories above.</span>
                   )}
                   {platformSettings.exploreCategories.map((cat, index) => (
-                    <div key={`${cat.name}-${index}`} className="flex items-center justify-between p-3 bg-secondary-50 border border-secondary-200 rounded-xl">
+                    <div key={`${cat.name}-${index}`} className="flex items-center justify-between p-3 bg-white border border-secondary-200 rounded-xl">
                       <div className="flex items-center gap-4">
                         <div className="w-8 h-8 rounded-full bg-secondary-200 flex items-center justify-center text-sm font-bold text-secondary-600">
                           {index + 1}

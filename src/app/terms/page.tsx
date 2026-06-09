@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold text-secondary-900 mb-4">Terms of Service</h1>

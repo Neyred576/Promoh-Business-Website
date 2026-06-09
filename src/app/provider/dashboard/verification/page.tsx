@@ -85,7 +85,7 @@ export default function VerificationCenterPage() {
             <CardDescription>Upload a government-issued ID (Passport, Driver's License, or National ID).</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed border-secondary-300 rounded-xl p-8 text-center bg-secondary-50 hover:bg-secondary-100 transition-colors cursor-pointer">
+            <div className="border-2 border-dashed border-secondary-300 rounded-xl p-8 text-center bg-white hover:bg-secondary-100 transition-colors cursor-pointer">
               <Upload className="w-8 h-8 text-secondary-400 mx-auto mb-4" />
               <p className="font-medium text-secondary-900">Click to upload document</p>
               <p className="text-sm text-secondary-500 mt-1">JPEG, PNG, or PDF up to 10MB</p>

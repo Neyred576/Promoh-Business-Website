@@ -61,7 +61,7 @@ export default function NewBookingContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-secondary-50">
+      <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-20 text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -79,7 +79,7 @@ export default function NewBookingContent() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-xl mx-auto px-4 py-10">
         <Link href={`/provider/${providerId}`}

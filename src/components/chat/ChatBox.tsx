@@ -83,7 +83,7 @@ export default function ChatBox({ chatId, currentUser }: ChatBoxProps) {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-secondary-200 bg-secondary-50">
+      <div className="p-4 border-t border-secondary-200 bg-white">
         <form onSubmit={handleSend} className="flex gap-2">
           <Input 
             value={newMessage}

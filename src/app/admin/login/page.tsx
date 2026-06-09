@@ -47,35 +47,35 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 gap-3">
-          <Image src="/logo.png" alt="Promoh Admin" width={56} height={56} className="w-auto h-12 brightness-0 invert" />
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
-            <Shield className="w-4 h-4 text-blue-500" />
+          <Image src="/logo.png" alt="Promoh Admin" width={56} height={56} className="w-auto h-12" />
+          <div className="flex items-center gap-2 text-secondary-500 text-sm">
+            <Shield className="w-4 h-4 text-primary-600" />
             <span>Restricted Access Portal</span>
           </div>
         </div>
 
-        <Card className="bg-slate-800 border-slate-700 text-slate-50 shadow-2xl">
+        <Card className="bg-white border-secondary-200 text-secondary-900 shadow-xl">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl text-white">Admin Login</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-2xl text-secondary-900">Admin Login</CardTitle>
+            <CardDescription className="text-secondary-500">
               Enter your master password to access the control center.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-5">
               {error && (
-                <div className="p-3 bg-red-900/50 text-red-200 text-sm rounded-xl border border-red-800 flex items-start gap-2">
+                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-200 flex items-start gap-2">
                   <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="text-sm font-medium text-slate-300 block mb-2">
+                <label className="text-sm font-medium text-secondary-700 block mb-2">
                   Master Password
                 </label>
                 <div className="relative">
@@ -86,12 +86,12 @@ export default function AdminLoginPage() {
                     required
                     autoFocus
                     placeholder="Enter master password"
-                    className="pr-12 bg-slate-900 border-slate-700 text-white placeholder:text-slate-600 focus-visible:ring-blue-500"
+                    className="pr-12 bg-white border-secondary-300 text-secondary-900 placeholder:text-secondary-400 focus-visible:ring-primary-500"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPw(!showPw)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600 transition-colors"
                   >
                     {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
