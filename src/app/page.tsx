@@ -43,7 +43,7 @@ const defaultCategoryMap: Record<string, { icon: React.ReactNode, color: string,
   "Movers": { icon: <Package className="w-8 h-8" />, color: "text-orange-500", bg: "bg-orange-50" },
   "Beauty Pros": { icon: <Scissors className="w-8 h-8" />, color: "text-rose-500", bg: "bg-rose-50" },
   "IT Specialists": { icon: <Monitor className="w-8 h-8" />, color: "text-indigo-500", bg: "bg-indigo-50" },
-  "Home Repair": { icon: <HomeIcon className="w-8 h-8" />, color: "text-slate-500", bg: "bg-slate-50" },
+  "Home Repair": { icon: <HomeIcon className="w-8 h-8" />, color: "text-secondary-600", bg: "bg-secondary-100" },
 };
 
 const getCategoryStyles = (name: string) => {
@@ -382,44 +382,44 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-secondary-900 text-secondary-300 py-16">
+      <footer className="bg-white border-t border-secondary-200 text-secondary-600 py-16">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-12">
           <div className="col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <Image src="/logo.png" alt="Promoh Logo" width={40} height={40} className="w-auto h-8 object-contain brightness-0 invert" />
-              <span className="text-2xl font-bold text-white tracking-tight">Promoh</span>
+              <Image src="/logo.png" alt="Promoh Logo" width={40} height={40} className="w-auto h-8 object-contain" />
+              <span className="text-2xl font-bold text-secondary-900 tracking-tight">Promoh</span>
             </div>
-            <p className="mb-6 text-sm leading-relaxed">Find. Compare. Chat. Book. Done. The world's trusted marketplace for service professionals.</p>
+            <p className="mb-6 text-sm leading-relaxed text-secondary-500">Find. Compare. Chat. Book. Done. The world's trusted marketplace for service professionals.</p>
             <a href="mailto:support@promoh.com" id="contact-support-btn"
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-primary-900/25 text-sm w-full justify-center">
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors shadow-sm text-sm w-full justify-center">
               <Mail className="w-4 h-4" />
               Contact Support
             </a>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Customers</h4>
+            <h4 className="text-secondary-900 font-semibold mb-4">Customers</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/search" className="hover:text-primary-400 transition-colors">Find a Professional</Link></li>
-              <li><Link href="/login" className="hover:text-primary-400 transition-colors">Log In</Link></li>
-              <li><Link href="/register" className="hover:text-primary-400 transition-colors">Sign Up</Link></li>
+              <li><Link href="/search" className="hover:text-primary-600 transition-colors">Find a Professional</Link></li>
+              <li><Link href="/login" className="hover:text-primary-600 transition-colors">Log In</Link></li>
+              <li><Link href="/register" className="hover:text-primary-600 transition-colors">Sign Up</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Providers</h4>
+            <h4 className="text-secondary-900 font-semibold mb-4">Providers</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/provider/register" className="hover:text-primary-400 transition-colors">Join as a Provider</Link></li>
-              <li><Link href="/provider/login" className="hover:text-primary-400 transition-colors">Provider Login</Link></li>
+              <li><Link href="/provider/register" className="hover:text-primary-600 transition-colors">Join as a Provider</Link></li>
+              <li><Link href="/provider/login" className="hover:text-primary-600 transition-colors">Provider Login</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
+            <h4 className="text-secondary-900 font-semibold mb-4">Legal</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/terms" className="hover:text-primary-400 transition-colors">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-primary-600 transition-colors">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary-600 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-secondary-800 text-center text-sm">
+        <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-secondary-200 text-center text-sm text-secondary-400">
           <p>© {new Date().getFullYear()} Promoh. All rights reserved.</p>
         </div>
       </footer>

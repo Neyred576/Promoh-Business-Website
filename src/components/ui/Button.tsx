@@ -19,10 +19,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50";
     
     const variants = {
-      default: "bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg",
-      secondary: "bg-secondary-100 text-secondary-900 hover:bg-secondary-200",
-      outline: "border border-secondary-300 bg-transparent hover:bg-white text-secondary-900",
-      ghost: "hover:bg-secondary-100 text-secondary-700 hover:text-secondary-900",
+      default: "bg-primary-600 text-white hover:bg-primary-700 shadow-sm",
+      destructive: "bg-red-500 text-white hover:bg-red-600 shadow-sm",
+      outline: "border-2 border-secondary-200 bg-white hover:border-primary-600 hover:text-primary-600 text-secondary-900 shadow-sm",
+      secondary: "bg-white border border-secondary-200 text-secondary-900 hover:bg-primary-50 hover:border-primary-200 hover:text-primary-700 shadow-sm",
+      ghost: "hover:bg-primary-50 text-secondary-700 hover:text-primary-700",
       link: "text-primary-600 underline-offset-4 hover:underline",
       danger: "bg-red-600 text-white hover:bg-red-700 shadow-sm",
     };

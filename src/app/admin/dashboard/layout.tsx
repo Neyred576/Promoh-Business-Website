@@ -36,8 +36,8 @@ export default function AdminDashboardLayout({
 
   if (!authorized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -53,11 +53,11 @@ export default function AdminDashboardLayout({
   return (
     <div className="min-h-screen bg-white flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-indigo-950 text-white flex flex-col shadow-xl z-10 md:min-h-screen">
-        <div className="h-20 flex items-center px-6 border-b border-indigo-900">
+      <aside className="w-full md:w-64 bg-white text-secondary-900 border-r border-secondary-200 flex flex-col shadow-sm z-10 md:min-h-screen">
+        <div className="h-20 flex items-center px-6 border-b border-secondary-200">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Promoh Logo" width={32} height={32} className="brightness-0 invert object-contain" />
-            <span className="text-xl font-bold tracking-tight text-white">Promoh Admin</span>
+            <Image src="/logo.png" alt="Promoh Logo" width={32} height={32} className="object-contain" />
+            <span className="text-xl font-bold tracking-tight text-primary-600">Promoh Admin</span>
           </Link>
         </div>
 
@@ -66,7 +66,7 @@ export default function AdminDashboardLayout({
             <Link
               key={item.label}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-900 text-indigo-200 hover:text-white transition-colors text-sm font-medium"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-50 text-secondary-600 hover:text-primary-600 transition-colors text-sm font-medium"
             >
               {item.icon}
               {item.label}
@@ -74,13 +74,13 @@ export default function AdminDashboardLayout({
           ))}
         </nav>
 
-        <div className="p-4 border-t border-indigo-900">
+        <div className="p-4 border-t border-secondary-200">
           <div className="px-4 py-2 mb-2">
-            <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Super Administrator</p>
+            <p className="text-xs text-primary-600 font-semibold uppercase tracking-wider">Super Administrator</p>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-red-900/50 text-indigo-300 hover:text-red-300 transition-colors text-left text-sm font-medium"
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-red-50 text-secondary-600 hover:text-red-600 transition-colors text-left text-sm font-medium"
           >
             <LogOut className="w-5 h-5" />
             Sign Out

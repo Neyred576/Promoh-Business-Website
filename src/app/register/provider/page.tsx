@@ -186,7 +186,7 @@ export default function ProviderRegisterPage() {
                 <div>
                   <label className="text-sm font-medium text-secondary-700 block mb-1">Country</label>
                   <select value={form.country} onChange={set("country")} required
-                    className="flex h-12 w-full rounded-xl border bg-secondary-900 border-secondary-700 text-white px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                    className="flex h-12 w-full rounded-xl border bg-white border-secondary-300 text-secondary-900 px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                     {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                   </select>
                 </div>
@@ -200,7 +200,7 @@ export default function ProviderRegisterPage() {
               <div>
                 <label className="text-sm font-medium text-secondary-700 block mb-1">Service Category</label>
                 <select value={form.serviceCategory} onChange={set("serviceCategory")} required
-                  className="flex h-12 w-full rounded-xl border bg-secondary-900 border-secondary-700 text-white px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                  className="flex h-12 w-full rounded-xl border bg-white border-secondary-300 text-secondary-900 px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                   <option value="">Select your primary service</option>
                   {SERVICE_CATEGORIES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -210,16 +210,16 @@ export default function ProviderRegisterPage() {
                 <label className="text-sm font-medium text-secondary-700 block mb-1">Password</label>
                 <div className="relative">
                   <Input type={showPw ? "text" : "password"} value={form.password} onChange={set("password")} required
-                    className="bg-secondary-900 border-secondary-700 text-white focus-visible:ring-primary-500 pr-12" />
-                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-500">
+                    className="bg-white border-secondary-300 text-secondary-900 focus-visible:ring-primary-500 pr-12" />
+                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600">
                     {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {form.password && (
                   <div className="mt-2 grid grid-cols-2 gap-1">
                     {pwRules.map(rule => (
-                      <div key={rule.label} className={`flex items-center gap-1.5 text-xs ${rule.ok ? "text-green-400" : "text-secondary-500"}`}>
-                        <div className={`w-3 h-3 rounded-full flex items-center justify-center ${rule.ok ? "bg-green-500" : "border border-secondary-600"}`}>
+                      <div key={rule.label} className={`flex items-center gap-1.5 text-xs ${rule.ok ? "text-green-600" : "text-secondary-400"}`}>
+                        <div className={`w-3 h-3 rounded-full flex items-center justify-center ${rule.ok ? "bg-green-500" : "border border-secondary-300"}`}>
                           {rule.ok && <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 12 12"><path d="M10 3L5 8.5 2 5.5" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                         </div>
                         {rule.label}
@@ -232,7 +232,7 @@ export default function ProviderRegisterPage() {
               <div>
                 <label className="text-sm font-medium text-secondary-700 block mb-1">Confirm Password</label>
                 <Input type="password" value={form.confirmPassword} onChange={set("confirmPassword")} required
-                  className="bg-secondary-900 border-secondary-700 text-white focus-visible:ring-primary-500" />
+                  className="bg-white border-secondary-300 text-secondary-900 focus-visible:ring-primary-500" />
               </div>
 
               <Button type="submit" className="w-full mt-2" isLoading={loading}>
