@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
     // Small delay for UX
     await new Promise(r => setTimeout(r, 400));
 
-    if (password === "Mohteeflair@090021") {
+    if (password === "Promoh@090021") {
       // Set secure cookie valid for 8 hours
       document.cookie = "admin_session=authenticated; path=/; max-age=28800; SameSite=Strict";
       router.push("/admin/dashboard");
