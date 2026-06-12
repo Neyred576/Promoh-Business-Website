@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { 
-  onAuthStateChanged, 
+import {
+  onAuthStateChanged,
   User as FirebaseUser,
   signOut as firebaseSignOut
 } from "firebase/auth";
@@ -18,6 +18,9 @@ export interface AppUser {
   photoURL: string | null;
   role: UserRole;
   isVerified?: boolean;
+  suspended?: boolean;
+  banned?: boolean;
+  currency?: string;
 }
 
 interface AuthContextType {
@@ -41,22 +44,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        // Fetch user role and additional data from Firestore
         try {
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
           let role: UserRole = "customer";
           let isVerified = false;
-          
+          let suspended = false;
+          let banned = false;
+          let currency = "USD";
+
           if (userDoc.exists()) {
             const data = userDoc.data();
             role = data.role || "customer";
             isVerified = data.isVerified || false;
+            suspended = data.suspended || false;
+            banned = data.banned || false;
+            currency = data.currency || "USD";
+
+            // If banned, sign out immediately
+            if (banned) {
+              await firebaseSignOut(auth);
+              setUser(null);
+              setLoading(false);
+              // Show alert in browser
+              if (typeof window !== "undefined") {
+                window.location.href = "/banned";
+              }
+              return;
+            }
           } else {
-            // Check if they are a provider in the providers collection (optional architecture)
+            // Check providers collection
             const providerDoc = await getDoc(doc(db, "providers", firebaseUser.uid));
             if (providerDoc.exists()) {
+              const data = providerDoc.data();
               role = "provider";
-              isVerified = providerDoc.data().isVerified || false;
+              isVerified = data.isVerified || false;
+              suspended = data.suspended || false;
+              banned = data.banned || false;
+              currency = data.currency || "USD";
+
+              if (banned) {
+                await firebaseSignOut(auth);
+                setUser(null);
+                setLoading(false);
+                if (typeof window !== "undefined") {
+                  window.location.href = "/banned";
+                }
+                return;
+              }
             }
           }
 
@@ -67,10 +101,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             photoURL: firebaseUser.photoURL,
             role,
             isVerified,
+            suspended,
+            banned,
+            currency,
           });
         } catch (error) {
           console.error("Error fetching user data:", error);
-          // Fallback to basic user if firestore fails
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,

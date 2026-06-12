@@ -13,11 +13,35 @@ export const COUNTRIES = [
   { name: "Ghana", code: "GH", dialCode: "+233", currency: "GHS", symbol: "GH₵" },
 ];
 
+export const CURRENCIES: Record<string, { symbol: string; name: string; code: string }> = {
+  USD: { symbol: "$", name: "US Dollar", code: "USD" },
+  EUR: { symbol: "€", name: "Euro", code: "EUR" },
+  GBP: { symbol: "£", name: "British Pound", code: "GBP" },
+  KES: { symbol: "KSh", name: "Kenyan Shilling", code: "KES" },
+  NGN: { symbol: "₦", name: "Nigerian Naira", code: "NGN" },
+  ZAR: { symbol: "R", name: "South African Rand", code: "ZAR" },
+  CAD: { symbol: "CA$", name: "Canadian Dollar", code: "CAD" },
+  AUD: { symbol: "A$", name: "Australian Dollar", code: "AUD" },
+  INR: { symbol: "₹", name: "Indian Rupee", code: "INR" },
+  AED: { symbol: "د.إ", name: "UAE Dirham", code: "AED" },
+  GHS: { symbol: "GH₵", name: "Ghanaian Cedi", code: "GHS" },
+};
+
 export function formatCurrency(amount: number, currency: string = "USD") {
-  const country = COUNTRIES.find(c => c.currency === currency);
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-    currencyDisplay: 'narrowSymbol'
-  }).format(amount);
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      currencyDisplay: 'narrowSymbol',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    const sym = CURRENCIES[currency]?.symbol || "$";
+    return `${sym}${amount.toLocaleString()}`;
+  }
+}
+
+export function getCurrencySymbol(currency: string): string {
+  return CURRENCIES[currency]?.symbol || "$";
 }

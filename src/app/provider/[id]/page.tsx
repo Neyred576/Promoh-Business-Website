@@ -3,17 +3,19 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase/client";
-import { doc, getDoc, collection, query, where, getDocs, onSnapshot } from "firebase/firestore";
-import { motion } from "framer-motion";
+import { doc, onSnapshot, collection, query, where, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
   ShieldCheck, MapPin, Star, Phone, Mail, MessageSquare,
-  CalendarCheck, ArrowLeft, Clock, Award
+  CalendarCheck, ArrowLeft, Clock, Award, Heart, Flag, Image as ImageIcon
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import ReportModal from "@/components/ui/ReportModal";
 
 interface ProviderData {
   businessName: string;
@@ -26,6 +28,7 @@ interface ProviderData {
   phone: string;
   email: string;
   photoURL?: string;
+  portfolioURLs?: string[];
   rating?: number;
   reviewCount?: number;
   isVerified?: boolean;
@@ -45,15 +48,19 @@ export default function ProviderProfilePage() {
   const params = useParams();
   const router = useRouter();
   const providerId = params.id as string;
+  const { user } = useAuth();
 
   const [provider, setProvider] = useState<ProviderData | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [savedProviders, setSavedProviders] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     if (!providerId) return;
 
-    // Real-time Provider profile
     const unsubProvider = onSnapshot(doc(db, "providers", providerId), (docSnap) => {
       if (docSnap.exists()) {
         setProvider(docSnap.data() as ProviderData);
@@ -63,7 +70,6 @@ export default function ProviderProfilePage() {
       setLoading(false);
     });
 
-    // Real-time Reviews
     const unsubReviews = onSnapshot(query(collection(db, "reviews"), where("providerId", "==", providerId)), (snap) => {
       setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() } as Review)));
     });
@@ -74,9 +80,35 @@ export default function ProviderProfilePage() {
     };
   }, [providerId]);
 
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsubUser = onSnapshot(doc(db, "users", user.uid), (snap) => {
+      if (snap.exists()) {
+        setSavedProviders(snap.data().savedProviders || []);
+      }
+    });
+    return () => unsubUser();
+  }, [user?.uid]);
+
+  const toggleSave = async () => {
+    if (!user?.uid) { router.push("/login"); return; }
+    if (saving) return;
+    setSaving(true);
+    try {
+      const isSaved = savedProviders.includes(providerId);
+      await updateDoc(doc(db, "users", user.uid), {
+        savedProviders: isSaved ? arrayRemove(providerId) : arrayUnion(providerId)
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-secondary-50">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-12 space-y-6">
           <div className="h-48 bg-secondary-200 rounded-2xl animate-pulse" />
@@ -89,7 +121,7 @@ export default function ProviderProfilePage() {
 
   if (!provider || provider.status !== "Approved") {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-secondary-50">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-24 text-center">
           <h1 className="text-2xl font-bold text-secondary-700">Provider not found</h1>
@@ -103,28 +135,44 @@ export default function ProviderProfilePage() {
   const displayName = provider.businessName || `${provider.firstName} ${provider.lastName}`;
   const services = provider.servicesOffered?.split(",").map(s => s.trim()).filter(Boolean) || [];
   const trustScore = provider.trustScore || Math.min(95, 70 + (provider.reviewCount || 0) * 2);
+  const isSaved = savedProviders.includes(providerId);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-secondary-50">
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Back */}
         <button onClick={() => router.back()} className="flex items-center gap-2 text-secondary-500 hover:text-secondary-900 transition-colors mb-6 text-sm font-medium">
-          <ArrowLeft className="w-4 h-4" /> Back to Results
+          <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Profile */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header Card */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="overflow-hidden">
-                <div className="h-48 bg-gradient-to-br from-primary-400 to-indigo-500 relative">
+              <Card className="overflow-hidden bg-white">
+                <div className="h-48 bg-gradient-to-br from-primary-400 to-indigo-500 relative flex justify-end p-4">
                   <div className="absolute inset-0 bg-black/10" />
+                  {/* Actions on banner */}
+                  <div className="relative z-10 flex gap-2">
+                    <button
+                      onClick={toggleSave}
+                      disabled={saving}
+                      className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow hover:scale-110 transition-transform"
+                    >
+                      <Heart className={`w-5 h-5 transition-colors ${isSaved ? "fill-rose-500 stroke-rose-500" : "stroke-secondary-600"}`} />
+                    </button>
+                    {user?.uid && user.uid !== providerId && (
+                      <button
+                        onClick={() => setShowReport(true)}
+                        className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow hover:scale-110 transition-transform text-secondary-600 hover:text-red-500"
+                      >
+                        <Flag className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <CardContent className="p-6 relative">
-                  {/* Avatar */}
                   <div className="absolute -top-12 left-6 w-24 h-24 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-white">
                     {provider.photoURL ? (
                       <Image src={provider.photoURL} alt={displayName} fill className="object-cover" />
@@ -139,7 +187,7 @@ export default function ProviderProfilePage() {
                       <h1 className="text-2xl font-bold text-secondary-900">{displayName}</h1>
                       {provider.isVerified && (
                         <span className="flex items-center gap-1 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-semibold border border-primary-200">
-                          <ShieldCheck className="w-4 h-4" /> Verified Provider
+                          <ShieldCheck className="w-4 h-4" /> Verified
                         </span>
                       )}
                     </div>
@@ -168,10 +216,10 @@ export default function ProviderProfilePage() {
             {/* About */}
             {provider.description && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <Card>
+                <Card className="bg-white">
                   <CardContent className="p-6">
                     <h2 className="text-lg font-bold mb-3">About</h2>
-                    <p className="text-secondary-600 leading-relaxed">{provider.description}</p>
+                    <p className="text-secondary-600 leading-relaxed whitespace-pre-wrap">{provider.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -180,7 +228,7 @@ export default function ProviderProfilePage() {
             {/* Services */}
             {services.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                <Card>
+                <Card className="bg-white">
                   <CardContent className="p-6">
                     <h2 className="text-lg font-bold mb-4">Services Offered</h2>
                     <div className="flex flex-wrap gap-2">
@@ -195,9 +243,29 @@ export default function ProviderProfilePage() {
               </motion.div>
             )}
 
+            {/* Portfolio Gallery */}
+            {provider.portfolioURLs && provider.portfolioURLs.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+                <Card className="bg-white">
+                  <CardContent className="p-6">
+                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-primary-500" /> Portfolio
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {provider.portfolioURLs.map((url, i) => (
+                        <div key={i} className="aspect-square relative rounded-xl overflow-hidden bg-secondary-100 border border-secondary-200 hover:opacity-90 transition-opacity cursor-pointer">
+                          <Image src={url} alt={`Portfolio item ${i + 1}`} fill className="object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
             {/* Reviews */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card>
+              <Card className="bg-white">
                 <CardContent className="p-6">
                   <h2 className="text-lg font-bold mb-4">
                     Reviews {reviews.length > 0 && <span className="text-secondary-500 font-normal">({reviews.length})</span>}
@@ -210,7 +278,7 @@ export default function ProviderProfilePage() {
                   ) : (
                     <div className="space-y-4">
                       {reviews.map(review => (
-                        <div key={review.id} className="p-4 bg-white rounded-xl">
+                        <div key={review.id} className="p-4 bg-secondary-50 rounded-xl border border-secondary-100">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold text-secondary-900">{review.customerName}</span>
                             <div className="flex items-center gap-1">
@@ -220,6 +288,9 @@ export default function ProviderProfilePage() {
                             </div>
                           </div>
                           <p className="text-secondary-600 text-sm">{review.comment}</p>
+                          <p className="text-xs text-secondary-400 mt-2">
+                            {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -232,10 +303,10 @@ export default function ProviderProfilePage() {
           {/* Booking Sidebar */}
           <div className="space-y-4">
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-              <Card className="sticky top-28">
+              <Card className="sticky top-28 bg-white border-primary-100 shadow-xl shadow-primary-500/5">
                 <CardContent className="p-6 space-y-4">
                   {provider.hourlyRate && (
-                    <div className="text-center py-3 bg-white rounded-xl">
+                    <div className="text-center py-3 bg-secondary-50 rounded-xl border border-secondary-100">
                       <p className="text-secondary-500 text-sm">Starting from</p>
                       <p className="text-3xl font-bold text-primary-700">${provider.hourlyRate}<span className="text-base font-medium text-secondary-500">/hr</span></p>
                     </div>
@@ -247,36 +318,30 @@ export default function ProviderProfilePage() {
                     </Button>
                   </Link>
 
-                  <Link href={`/chat?provider=${providerId}`} className="block">
-                    <Button id="chat-provider-btn" variant="outline" className="w-full">
-                      <MessageSquare className="w-5 h-5 mr-2" /> Chat
-                    </Button>
-                  </Link>
+                  {user?.uid !== providerId && (
+                    <Link href={`/chat?provider=${providerId}`} className="block">
+                      <Button id="chat-provider-btn" variant="outline" className="w-full h-11">
+                        <MessageSquare className="w-4 h-4 mr-2" /> Message Provider
+                      </Button>
+                    </Link>
+                  )}
 
                   {provider.phone && (
                     <a href={`tel:${provider.phone}`} className="block">
-                      <Button id="contact-provider-btn" variant="secondary" className="w-full">
-                        <Phone className="w-5 h-5 mr-2" /> Call {provider.phone}
+                      <Button id="contact-provider-btn" variant="secondary" className="w-full h-11">
+                        <Phone className="w-4 h-4 mr-2" /> Call {provider.phone}
                       </Button>
                     </a>
                   )}
 
-                  {provider.email && (
-                    <a href={`mailto:${provider.email}`} className="block">
-                      <Button variant="ghost" className="w-full text-sm text-secondary-600">
-                        <Mail className="w-4 h-4 mr-2" /> {provider.email}
-                      </Button>
-                    </a>
-                  )}
-
-                  <div className="pt-2 border-t border-secondary-200 space-y-2 text-sm text-secondary-600">
+                  <div className="pt-4 mt-2 border-t border-secondary-200 space-y-3 text-sm text-secondary-600">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-secondary-400" />
+                      <Clock className="w-4 h-4 text-secondary-400 shrink-0" />
                       <span>Typically responds within 1 hour</span>
                     </div>
                     {provider.isVerified && (
-                      <div className="flex items-center gap-2 text-primary-700">
-                        <ShieldCheck className="w-4 h-4" />
+                      <div className="flex items-center gap-2 text-primary-700 font-medium">
+                        <ShieldCheck className="w-4 h-4 shrink-0" />
                         <span>Identity Verified by Promoh</span>
                       </div>
                     )}
@@ -287,6 +352,17 @@ export default function ProviderProfilePage() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showReport && (
+          <ReportModal
+            targetId={providerId}
+            targetName={displayName}
+            targetType="provider"
+            onClose={() => setShowReport(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

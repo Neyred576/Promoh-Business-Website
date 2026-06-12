@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { db } from "@/lib/firebase/client";
-import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, deleteDoc, setDoc, addDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, getDoc, updateDoc, deleteDoc, setDoc, addDoc } from "firebase/firestore";
 import {
   Users, Briefcase, Clock, Activity, CheckCircle, XCircle,
-  Star, Trash2, Eye, ToggleLeft, ToggleRight, ShieldCheck, AlertTriangle, Plus, LayoutDashboard, Key, Calendar
+  Star, Trash2, Eye, ToggleLeft, ToggleRight, ShieldCheck, AlertTriangle, Plus, LayoutDashboard, Key, Calendar, Flag, ShieldAlert, Ban
 } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/currencies";
 
 interface Provider {
   id: string;
@@ -23,6 +24,7 @@ interface Provider {
   status: string;
   isVerified: boolean;
   isFeatured: boolean;
+  banned?: boolean;
   createdAt: string;
   rating?: number;
 }
@@ -33,6 +35,7 @@ interface Customer {
   lastName: string;
   email: string;
   phone?: string;
+  banned?: boolean;
   createdAt: string;
 }
 
@@ -45,6 +48,7 @@ export default function AdminDashboardPage() {
   const [allProviders, setAllProviders] = useState<Provider[]>([]);
   const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
   const [allBookings, setAllBookings] = useState<any[]>([]);
+  const [allReports, setAllReports] = useState<any[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [loadingProviders, setLoadingProviders] = useState(true);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
@@ -105,7 +109,14 @@ export default function AdminDashboardPage() {
       setTotalRevenue(revenue);
     });
 
-    return () => { unsubUsers(); unsubProviders(); unsubBookings(); };
+    // Listen to all reports
+    const unsubReports = onSnapshot(collection(db, "reports"), (snap) => {
+      const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      reports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setAllReports(reports);
+    });
+
+    return () => { unsubUsers(); unsubProviders(); unsubBookings(); unsubReports(); };
   }, []);
 
   useEffect(() => {
@@ -149,8 +160,6 @@ export default function AdminDashboardPage() {
 
     return () => { unsubSettings(); unsubAnnouncements(); };
   }, []);
-
-  // Customer list is now fetched in real-time above
 
   const showMsg = (msg: string) => { setMessage(msg); setTimeout(() => setMessage(""), 3000); };
 
@@ -206,8 +215,38 @@ export default function AdminDashboardPage() {
     if (!confirm("Are you sure? This cannot be undone.")) return;
     try {
       await deleteDoc(doc(db, collection_name, id));
+      if (collection_name === "providers") {
+        await deleteDoc(doc(db, "users", id));
+      }
       showMsg("Account deleted.");
     } catch (e) { showMsg("Error deleting account."); }
+  };
+
+  const toggleBanUser = async (id: string, collection_name: string, isBanned: boolean) => {
+    try {
+      const newBannedState = !isBanned;
+      await updateDoc(doc(db, collection_name, id), { banned: newBannedState });
+      if (collection_name === "providers") {
+        await updateDoc(doc(db, "users", id), { banned: newBannedState });
+      }
+      showMsg(newBannedState ? "User has been banned." : "User has been unbanned.");
+    } catch (e) { showMsg("Error updating ban status."); }
+  };
+
+  const resolveReport = async (reportId: string, action: "dismiss" | "ban", targetId: string, targetType: string) => {
+    try {
+      await updateDoc(doc(db, "reports", reportId), {
+        status: "resolved",
+        resolution: action,
+        resolvedAt: new Date().toISOString()
+      });
+      if (action === "ban") {
+        await toggleBanUser(targetId, targetType === "provider" ? "providers" : "users", false);
+      }
+      showMsg(`Report resolved (${action})`);
+    } catch (err) {
+      showMsg("Error resolving report.");
+    }
   };
 
   const viewCredentials = async (id: string, name: string) => {
@@ -229,7 +268,6 @@ export default function AdminDashboardPage() {
       await updateDoc(doc(db, "platform_settings", "homepage"), updates);
       showMsg("Settings updated successfully.");
     } catch (e) {
-      // If document doesn't exist, create it
       await setDoc(doc(db, "platform_settings", "homepage"), updates);
       showMsg("Settings created successfully.");
     }
@@ -265,7 +303,6 @@ export default function AdminDashboardPage() {
     const newCategories = [...platformSettings.exploreCategories];
     if (index + direction < 0 || index + direction >= newCategories.length) return;
     
-    // Swap
     const temp = newCategories[index];
     newCategories[index] = newCategories[index + direction];
     newCategories[index + direction] = temp;
@@ -293,10 +330,12 @@ export default function AdminDashboardPage() {
     { title: "Approved Providers", value: allProviders.filter(p => p.status === "Approved").length, icon: <CheckCircle className="w-5 h-5 text-green-600" />, bg: "bg-green-50 border-green-200" },
   ];
 
-  const TABS = ["overview", "analytics", "bookings", "providers", "customers", "categories", "homepage CMS"];
+  const TABS = ["overview", "analytics", "bookings", "providers", "customers", "reports", "categories", "homepage CMS"];
+
+  const openReportsCount = allReports.filter(r => r.status === "open").length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto pb-20">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-secondary-900">Admin Control Center</h1>
         <p className="text-secondary-500 mt-1">Real-time platform management and oversight.</p>
@@ -309,28 +348,45 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Pending Alert */}
-      {stats.pending > 0 && (
-        <div className="mb-6 flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-          <span className="text-amber-800 font-medium">
-            {stats.pending} provider application{stats.pending > 1 ? "s" : ""} pending review
-          </span>
-          <Button size="sm" variant="outline" className="ml-auto border-amber-300 text-amber-800 hover:bg-amber-100"
-            onClick={() => setActiveTab("providers")}>
-            Review Now
-          </Button>
-        </div>
-      )}
+      {/* Alerts Row */}
+      <div className="flex flex-col gap-3 mb-6">
+        {stats.pending > 0 && (
+          <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <span className="text-amber-800 font-medium">
+              {stats.pending} provider application{stats.pending > 1 ? "s" : ""} pending review
+            </span>
+            <Button size="sm" variant="outline" className="ml-auto border-amber-300 text-amber-800 hover:bg-amber-100"
+              onClick={() => setActiveTab("providers")}>
+              Review Now
+            </Button>
+          </div>
+        )}
+        {openReportsCount > 0 && (
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+            <span className="text-red-800 font-medium">
+              {openReportsCount} unresolved Trust & Safety report{openReportsCount > 1 ? "s" : ""}
+            </span>
+            <Button size="sm" variant="outline" className="ml-auto border-red-300 text-red-800 hover:bg-red-100"
+              onClick={() => setActiveTab("reports")}>
+              Review Reports
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-secondary-200 mb-6 overflow-x-auto">
+      <div className="flex border-b border-secondary-200 mb-6 overflow-x-auto hide-scrollbar">
         {TABS.map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 font-medium text-sm whitespace-nowrap transition-colors border-b-2 ${
+            className={`px-6 py-3 font-medium text-sm whitespace-nowrap transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === tab ? "border-indigo-600 text-indigo-700" : "border-transparent text-secondary-500 hover:text-secondary-800"
             }`}>
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === "reports" && openReportsCount > 0 && (
+              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{openReportsCount}</span>
+            )}
           </button>
         ))}
       </div>
@@ -456,7 +512,7 @@ export default function AdminDashboardPage() {
               <CardDescription>Total transaction volume processed across all completed bookings.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-green-600">${totalRevenue.toLocaleString()}</div>
+              <div className="text-4xl font-bold text-green-600">{formatCurrency(totalRevenue, "USD")}</div>
               <p className="text-sm text-secondary-500 mt-2">from {allBookings.filter(b => b.status === "completed").length} completed bookings.</p>
             </CardContent>
           </Card>
@@ -480,8 +536,8 @@ export default function AdminDashboardPage() {
                   <div className="text-sm text-green-600 font-medium">Completed</div>
                 </div>
                 <div className="p-4 bg-red-50 rounded-xl border border-red-200 text-center">
-                  <div className="text-2xl font-bold text-red-700">{allBookings.filter(b => b.status === "rejected").length}</div>
-                  <div className="text-sm text-red-600 font-medium">Rejected</div>
+                  <div className="text-2xl font-bold text-red-700">{allBookings.filter(b => b.status === "cancelled" || b.status === "rejected").length}</div>
+                  <div className="text-sm text-red-600 font-medium">Cancelled/Rejected</div>
                 </div>
               </div>
             </CardContent>
@@ -505,18 +561,66 @@ export default function AdminDashboardPage() {
                   <div key={b.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 bg-white hover:bg-white transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-secondary-900 flex gap-2 items-center">
-                        Booking from <span className="font-bold">{b.customerName}</span>
+                        Booking from <span className="font-bold">{b.customerName}</span> to <span className="font-bold">{b.providerName}</span>
                         <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${
                           b.status === 'completed' ? 'bg-green-100 text-green-700' :
                           b.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                          b.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                          b.status === 'accepted' || b.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
                           'bg-red-100 text-red-700'
-                        }`}>{b.status}</span>
+                        }`}>{b.status.replace("_", " ")}</span>
                       </div>
                       <div className="text-xs text-secondary-500 mt-1">
-                        Date: {b.date} at {b.time} · Provider ID: {b.providerId}
+                        Date: {b.date} at {b.time} · Service: {b.service}
                       </div>
-                      {b.amount && <div className="text-sm font-bold text-green-600 mt-1">Amount: ${b.amount}</div>}
+                      {b.amount && <div className="text-sm font-bold text-green-600 mt-1">Amount: {formatCurrency(b.amount, b.currency || "USD")}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* REPORTS */}
+      {activeTab === "reports" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Trust & Safety Reports ({allReports.length})</CardTitle>
+            <CardDescription>Review and resolve user reports. Banning a user prevents them from logging in.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {allReports.length === 0 ? (
+              <div className="text-center py-12 text-secondary-400">No reports found.</div>
+            ) : (
+              <div className="space-y-4">
+                {allReports.map(r => (
+                  <div key={r.id} className={`p-4 rounded-xl border ${r.status === "open" ? "bg-red-50 border-red-100" : "bg-white border-secondary-200"}`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <Flag className={`w-5 h-5 ${r.status === "open" ? "text-red-500" : "text-secondary-400"}`} />
+                        <span className="font-bold text-secondary-900">Report against {r.targetName} ({r.targetType})</span>
+                        {r.status !== "open" && (
+                          <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold uppercase">Resolved: {r.resolution}</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-secondary-500">{new Date(r.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div className="ml-7 space-y-2">
+                      <p className="text-sm text-secondary-700"><span className="font-semibold">Reason:</span> {r.reason}</p>
+                      {r.description && <p className="text-sm text-secondary-600 italic">"{r.description}"</p>}
+                      <p className="text-xs text-secondary-400">Reported by: {r.reporterName}</p>
+                      
+                      {r.status === "open" && (
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-red-100">
+                          <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={() => resolveReport(r.id, "ban", r.targetId, r.targetType)}>
+                            <Ban className="w-4 h-4 mr-1.5" /> Ban User
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => resolveReport(r.id, "dismiss", r.targetId, r.targetType)}>
+                            Dismiss Report
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -531,7 +635,7 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>All Providers ({allProviders.length})</CardTitle>
-            <CardDescription>Manage approvals and homepage feature status for all providers.</CardDescription>
+            <CardDescription>Manage approvals, bans, and homepage feature status for all providers.</CardDescription>
           </CardHeader>
           <CardContent>
             {loadingProviders ? (
@@ -541,7 +645,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {allProviders.map(p => (
-                  <div key={p.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 hover:bg-white transition-colors flex-wrap">
+                  <div key={p.id} className={`flex items-center gap-4 p-4 rounded-xl border hover:bg-white transition-colors flex-wrap ${p.banned ? "border-red-300 bg-red-50" : "border-secondary-200"}`}>
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-indigo-400 flex items-center justify-center text-white font-bold shrink-0">
                       {(p.businessName || p.firstName || "?")[0].toUpperCase()}
                     </div>
@@ -550,6 +654,7 @@ export default function AdminDashboardPage() {
                         {p.businessName || `${p.firstName} ${p.lastName}`}
                         {p.isVerified && <ShieldCheck className="w-4 h-4 text-primary-500" />}
                         {p.isFeatured && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
+                        {p.banned && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Banned</span>}
                       </div>
                       <div className="text-xs text-secondary-400">{p.email} · {p.servicesOffered}</div>
                     </div>
@@ -558,9 +663,9 @@ export default function AdminDashboardPage() {
                       p.status === "Rejected" ? "bg-red-100 text-red-700" :
                       "bg-amber-100 text-amber-700"
                     }`}>{p.status}</span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {/* Feature toggle */}
-                      {p.status === "Approved" && (
+                    
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                      {p.status === "Approved" && !p.banned && (
                         <Button size="sm" variant="ghost" title={p.isFeatured ? "Remove from homepage" : "Feature on homepage"}
                           isLoading={actionLoading === p.id + "_feature"}
                           onClick={() => toggleFeatured(p.id, p.isFeatured)}
@@ -568,7 +673,7 @@ export default function AdminDashboardPage() {
                           {p.isFeatured ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
                         </Button>
                       )}
-                      {p.status === "Pending" && (
+                      {p.status === "Pending" && !p.banned && (
                         <Button size="sm" variant="outline" className="text-green-700 border-green-300 hover:bg-green-50"
                           isLoading={actionLoading === p.id + "_approve"}
                           onClick={() => approveProvider(p.id)}>
@@ -580,7 +685,13 @@ export default function AdminDashboardPage() {
                         onClick={() => viewCredentials(p.id, p.businessName || `${p.firstName} ${p.lastName}`)}>
                         <Key className="w-4 h-4" />
                       </Button>
+                      <Button size="sm" variant="ghost" className={`${p.banned ? "text-green-600 hover:text-green-700 hover:bg-green-50" : "text-red-500 hover:text-red-700 hover:bg-red-50"}`}
+                        title={p.banned ? "Unban User" : "Ban User"}
+                        onClick={() => toggleBanUser(p.id, "providers", !!p.banned)}>
+                        {p.banned ? <ShieldCheck className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                      </Button>
                       <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Delete User"
                         onClick={() => deleteUser(p.id, "providers")}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -608,19 +719,31 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-2">
                 {allCustomers.map(c => (
-                  <div key={c.id} className="flex items-center gap-4 p-4 rounded-xl border border-secondary-200 hover:bg-white transition-colors">
+                  <div key={c.id} className={`flex items-center gap-4 p-4 rounded-xl border hover:bg-white transition-colors ${c.banned ? "border-red-300 bg-red-50" : "border-secondary-200"}`}>
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
                       {(c.firstName || c.email || "?")[0].toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-secondary-900">{c.firstName} {c.lastName}</div>
+                      <div className="font-semibold text-secondary-900 flex items-center gap-2">
+                        {c.firstName} {c.lastName}
+                        {c.banned && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Banned</span>}
+                      </div>
                       <div className="text-xs text-secondary-400">{c.email} {c.phone && `· ${c.phone}`}</div>
                     </div>
-                    <div className="text-xs text-secondary-400">{new Date(c.createdAt).toLocaleDateString()}</div>
-                    <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => deleteUser(c.id, "users")}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="text-xs text-secondary-400 hidden sm:block">{new Date(c.createdAt).toLocaleDateString()}</div>
+                    
+                    <div className="flex gap-1 shrink-0">
+                      <Button size="sm" variant="ghost" className={`${c.banned ? "text-green-600 hover:text-green-700 hover:bg-green-50" : "text-red-500 hover:text-red-700 hover:bg-red-50"}`}
+                        title={c.banned ? "Unban User" : "Ban User"}
+                        onClick={() => toggleBanUser(c.id, "users", !!c.banned)}>
+                        {c.banned ? <ShieldCheck className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Delete User"
+                        onClick={() => deleteUser(c.id, "users")}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -648,6 +771,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       )}
+
       {/* HOMEPAGE CMS */}
       {activeTab === "homepage CMS" && (
         <div className="space-y-6">
