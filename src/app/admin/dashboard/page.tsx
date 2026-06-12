@@ -25,6 +25,7 @@ interface Provider {
   isVerified: boolean;
   isFeatured: boolean;
   banned?: boolean;
+  verificationDocumentUrl?: string;
   createdAt: string;
   rating?: number;
 }
@@ -432,6 +433,13 @@ export default function AdminDashboardPage() {
                         <div className="text-xs text-secondary-500">{p.servicesOffered} · {p.location} · {p.email}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
+                        {p.verificationDocumentUrl && (
+                          <Link href={p.verificationDocumentUrl} target="_blank">
+                            <Button size="sm" variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-50" title="View Identity Document">
+                              <ShieldCheck className="w-4 h-4 mr-1" /> View ID
+                            </Button>
+                          </Link>
+                        )}
                         <Link href={`/provider/${p.id}`} target="_blank">
                           <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
                         </Link>
@@ -665,6 +673,13 @@ export default function AdminDashboardPage() {
                     }`}>{p.status}</span>
                     
                     <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                      {p.verificationDocumentUrl && (
+                        <Link href={p.verificationDocumentUrl} target="_blank">
+                          <Button size="sm" variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-50" title="View Identity Document">
+                            <ShieldCheck className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                      )}
                       {p.status === "Approved" && !p.banned && (
                         <Button size="sm" variant="ghost" title={p.isFeatured ? "Remove from homepage" : "Feature on homepage"}
                           isLoading={actionLoading === p.id + "_feature"}

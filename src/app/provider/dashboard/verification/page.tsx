@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, AlertCircle, Upload, Phone, Mail } from "lucide-react";
@@ -12,21 +12,59 @@ export default function VerificationCenterPage() {
   const { user } = useAuth();
   const [status, setStatus] = useState("Pending");
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [documentUrl, setDocumentUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function loadStatus() {
       if (!user?.uid) return;
       const docSnap = await getDoc(doc(db, "providers", user.uid));
       if (docSnap.exists()) {
-        setStatus(docSnap.data().status || "Pending");
+        const data = docSnap.data();
+        setStatus(data.status || "Pending");
+        if (data.verificationDocumentUrl) {
+          setDocumentUrl(data.verificationDocumentUrl);
+        }
       }
       setLoading(false);
     }
     loadStatus();
   }, [user]);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch("https://api.imgbb.com/1/upload?key=3a8672d6f05b114ce3c0c6e81c8bd9fe", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDocumentUrl(data.data.url);
+        // Automatically save the URL to Firestore so they don't lose it if they refresh
+        if (user?.uid) {
+          await updateDoc(doc(db, "providers", user.uid), { verificationDocumentUrl: data.data.url });
+        }
+      } else {
+        alert("Failed to upload document.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading document.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDocumentSubmit = async () => {
-    if (!user?.uid) return;
+    if (!user?.uid || !documentUrl) return;
     await updateDoc(doc(db, "providers", user.uid), {
       status: "Under Review"
     });
@@ -70,30 +108,34 @@ export default function VerificationCenterPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Phone className="w-5 h-5 text-primary-600" /> Phone Verification</CardTitle>
-            <CardDescription>Add a phone number so customers can reach you.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <span className="text-secondary-500">Not verified yet</span>
-            <Button variant="outline">Send Code</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
             <CardTitle className="flex items-center gap-2"><Upload className="w-5 h-5 text-primary-600" /> Identity Document Upload</CardTitle>
             <CardDescription>Upload a government-issued ID (Passport, Driver's License, or National ID).</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed border-secondary-300 rounded-xl p-8 text-center bg-white hover:bg-secondary-100 transition-colors cursor-pointer">
-              <Upload className="w-8 h-8 text-secondary-400 mx-auto mb-4" />
-              <p className="font-medium text-secondary-900">Click to upload document</p>
-              <p className="text-sm text-secondary-500 mt-1">JPEG, PNG, or PDF up to 10MB</p>
+            {documentUrl ? (
+              <div className="mb-4">
+                <p className="text-sm text-green-600 font-medium mb-2">✅ Document Uploaded Successfully</p>
+                <img src={documentUrl} alt="ID Document" className="max-h-48 rounded-lg border border-secondary-200 object-cover" />
+              </div>
+            ) : null}
+
+            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+            
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed ${uploading ? "border-primary-400 bg-primary-50" : "border-secondary-300 bg-white hover:bg-secondary-50"} rounded-xl p-8 text-center transition-colors cursor-pointer`}
+            >
+              <Upload className={`w-8 h-8 mx-auto mb-4 ${uploading ? "text-primary-500 animate-bounce" : "text-secondary-400"}`} />
+              <p className="font-medium text-secondary-900">{uploading ? "Uploading securely..." : "Click to select document image"}</p>
+              <p className="text-sm text-secondary-500 mt-1">JPEG or PNG only</p>
             </div>
             
             <div className="mt-6 flex justify-end">
-              <Button onClick={handleDocumentSubmit} disabled={status === "Under Review" || status === "Approved"}>
-                Submit for Verification
+              <Button 
+                onClick={handleDocumentSubmit} 
+                disabled={status === "Under Review" || status === "Approved" || !documentUrl}
+              >
+                {status === "Under Review" ? "Currently Under Review" : status === "Approved" ? "Verified" : "Submit for Verification"}
               </Button>
             </div>
           </CardContent>

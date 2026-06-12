@@ -40,12 +40,6 @@ export default function ProviderRegisterPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      router.push("/provider/dashboard");
-    }
-  }, [user, router]);
-
   const pwRules = validatePassword(form.password);
   const pwValid = pwRules.every(r => r.ok);
 

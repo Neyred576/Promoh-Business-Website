@@ -35,12 +35,6 @@ export default function CustomerRegisterPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      router.push("/");
-    }
-  }, [user, router]);
-
   const pwRules = validatePassword(form.password);
   const pwValid = pwRules.every(r => r.ok);
 

@@ -24,6 +24,7 @@ export default function ProviderProfilePage() {
     phone: "",
     hourlyRate: "",
     photoURL: "",
+    currency: "USD",
   });
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function ProviderProfilePage() {
             phone: data.phone || "",
             hourlyRate: data.hourlyRate || "",
             photoURL: data.photoURL || "",
+            currency: data.currency || "USD",
           });
         }
       } catch (error) {
@@ -183,7 +185,7 @@ export default function ProviderProfilePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Base Hourly Rate (USD)</label>
+                <label className="text-sm font-medium">Base Hourly Rate ({formData.currency})</label>
                 <Input 
                   name="hourlyRate"
                   type="number"
