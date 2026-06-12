@@ -105,7 +105,7 @@ export default function ChatPage() {
     const unsub = onSnapshot(q, async (snap) => {
       const convs: Conversation[] = [];
       for (const docSnap of snap.docs) {
-        const data = docSnap.data();
+        const data = docSnap.data() as any;
         const otherId = data.participantIds.find((id: string) => id !== user.uid);
         if (!otherId) continue;
 
