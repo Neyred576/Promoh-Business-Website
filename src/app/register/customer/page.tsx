@@ -50,22 +50,22 @@ export default function CustomerRegisterPage() {
       // Phone check removed to prevent timeout issues
 
       const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
-      await updateProfile(cred.user, { displayName: `${form.firstName} ${form.lastName}` });
-      await sendEmailVerification(cred.user);
-
       const countryData = COUNTRIES.find(c => c.code === form.country);
-
-      await setDoc(doc(db, "users", cred.user.uid), {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        phone: form.phone ? `${countryData?.dialCode || ""} ${form.phone}`.trim() : "",
-        country: form.country,
-        currency: countryData?.currency || "USD",
-        role: "customer",
-        emailVerified: false,
-        createdAt: new Date().toISOString(),
-      });
+      await Promise.all([
+        updateProfile(cred.user, { displayName: `${form.firstName} ${form.lastName}` }),
+        sendEmailVerification(cred.user),
+        setDoc(doc(db, "users", cred.user.uid), {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone ? `${countryData?.dialCode || ""} ${form.phone}`.trim() : "",
+          country: form.country,
+          currency: countryData?.currency || "USD",
+          role: "customer",
+          emailVerified: false,
+          createdAt: new Date().toISOString(),
+        })
+      ]);
 
       router.push("/");
     } catch (err: any) {

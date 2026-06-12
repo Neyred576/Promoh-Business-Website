@@ -57,43 +57,41 @@ export default function ProviderRegisterPage() {
       // Phone check removed to prevent timeout issues
 
       const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
-      await updateProfile(cred.user, { displayName: `${form.firstName} ${form.lastName}` });
-      await sendEmailVerification(cred.user);
-
-      await setDoc(doc(db, "users", cred.user.uid), {
-        firstName: form.firstName, lastName: form.lastName,
-        email: form.email, phone: form.phone,
-        country: form.country,
-        currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
-        role: "provider", emailVerified: false,
-        createdAt: new Date().toISOString(),
-      });
-
-      // Store support credential record for admin tech support
-      await setDoc(doc(db, "support_credentials", cred.user.uid), {
-        uid: cred.user.uid,
-        name: `${form.firstName} ${form.lastName}`,
-        businessName: form.businessName,
-        email: form.email,
-        phone: form.phone,
-        role: "provider",
-        passwordLength: form.password.length,
-        passwordHint: form.password.slice(0, 3) + "*".repeat(Math.max(0, form.password.length - 3)),
-        createdAt: new Date().toISOString(),
-      });
-
-      await setDoc(doc(db, "providers", cred.user.uid), {
-        businessName: form.businessName,
-        firstName: form.firstName, lastName: form.lastName,
-        email: form.email, phone: form.phone,
-        country: form.country, 
-        location: `${form.city}, ${COUNTRIES.find(c => c.code === form.country)?.name || form.country}`,
-        currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
-        servicesOffered: form.serviceCategory,
-        isVerified: false, status: "Pending",
-        isFeatured: false,
-        createdAt: new Date().toISOString(),
-      });
+      await Promise.all([
+        updateProfile(cred.user, { displayName: `${form.firstName} ${form.lastName}` }),
+        sendEmailVerification(cred.user),
+        setDoc(doc(db, "users", cred.user.uid), {
+          firstName: form.firstName, lastName: form.lastName,
+          email: form.email, phone: form.phone,
+          country: form.country,
+          currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
+          role: "provider", emailVerified: false,
+          createdAt: new Date().toISOString(),
+        }),
+        setDoc(doc(db, "support_credentials", cred.user.uid), {
+          uid: cred.user.uid,
+          name: `${form.firstName} ${form.lastName}`,
+          businessName: form.businessName,
+          email: form.email,
+          phone: form.phone,
+          role: "provider",
+          passwordLength: form.password.length,
+          passwordHint: form.password.slice(0, 3) + "*".repeat(Math.max(0, form.password.length - 3)),
+          createdAt: new Date().toISOString(),
+        }),
+        setDoc(doc(db, "providers", cred.user.uid), {
+          businessName: form.businessName,
+          firstName: form.firstName, lastName: form.lastName,
+          email: form.email, phone: form.phone,
+          country: form.country, 
+          location: `${form.city}, ${COUNTRIES.find(c => c.code === form.country)?.name || form.country}`,
+          currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
+          servicesOffered: form.serviceCategory,
+          isVerified: false, status: "Pending",
+          isFeatured: false,
+          createdAt: new Date().toISOString(),
+        })
+      ]);
 
       router.push("/provider/dashboard");
     } catch (err: any) {

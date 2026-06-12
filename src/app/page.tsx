@@ -86,26 +86,24 @@ export default function Home() {
 
   // Fetch real-time featured providers from Firestore
   useEffect(() => {
-    async function fetchFeatured() {
-      try {
-        const q = query(
-          collection(db, "providers"),
-          where("status", "==", "Approved"),
-          where("isFeatured", "==", true),
-          limit(6)
-        );
-        const snapshot = await getDocs(q);
-        const providers: FeaturedProvider[] = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data() as Omit<FeaturedProvider, "id">
-        }));
-        setFeaturedProviders(providers);
-      } catch (e) {
-        setFeaturedProviders([]);
-      } finally {
-        setLoadingFeatured(false);
-      }
-    }
+    const q = query(
+      collection(db, "providers"),
+      where("status", "==", "Approved"),
+      where("isFeatured", "==", true),
+      limit(6)
+    );
+    
+    const unsubFeatured = onSnapshot(q, (snapshot) => {
+      const providers: FeaturedProvider[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data() as Omit<FeaturedProvider, "id">
+      }));
+      setFeaturedProviders(providers);
+      setLoadingFeatured(false);
+    }, (error) => {
+      setFeaturedProviders([]);
+      setLoadingFeatured(false);
+    });
     
     // Listen for real-time platform settings changes
     const unsubSettings = onSnapshot(doc(db, "platform_settings", "homepage"), (docSnap) => {
@@ -123,9 +121,10 @@ export default function Home() {
       }
     });
     
-    fetchFeatured();
-    
-    return () => unsubSettings();
+    return () => {
+      unsubSettings();
+      unsubFeatured();
+    };
   }, []);
 
   return (
