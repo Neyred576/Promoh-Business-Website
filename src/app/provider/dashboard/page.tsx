@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase/client";
 import { collection, query, where, onSnapshot, doc, updateDoc, addDoc } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-import { ShieldAlert, TrendingUp, Calendar, Star, MessageSquare, CheckCircle, XCircle } from "lucide-react";
+import { ShieldAlert, TrendingUp, Calendar, Star, MessageSquare, CheckCircle, XCircle, MapPin } from "lucide-react";
 import { formatCurrency } from "@/lib/currencies";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";

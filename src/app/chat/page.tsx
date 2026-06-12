@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { db, storage } from "@/lib/firebase/client";
 import {
@@ -58,7 +58,7 @@ function formatTime(ts: any): string {
   return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
-export default function ChatPage() {
+function ChatContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -77,7 +77,7 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -216,7 +216,9 @@ export default function ChatPage() {
       setTyping(true);
       updateDoc(doc(db, "chats", activeChatId), { [`typing.${user.uid}`]: true }).catch(() => {});
     }
-    clearTimeout(typingTimeout.current);
+    if (typingTimeout.current !== undefined) {
+      clearTimeout(typingTimeout.current);
+    }
     typingTimeout.current = setTimeout(() => {
       setTyping(false);
       updateDoc(doc(db, "chats", activeChatId), { [`typing.${user.uid}`]: false }).catch(() => {});
@@ -519,5 +521,17 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ChatContent />
+    </Suspense>
   );
 }
