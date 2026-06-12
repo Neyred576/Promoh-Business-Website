@@ -13,14 +13,7 @@ import Image from "next/image";
 import { CheckCircle, Eye, EyeOff } from "lucide-react";
 import { COUNTRIES } from "@/lib/currencies";
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out.")), ms)
-    ),
-  ]);
-}
+
 
 function validatePassword(password: string) {
   return [
@@ -62,20 +55,17 @@ export default function CustomerRegisterPage() {
 
       const countryData = COUNTRIES.find(c => c.code === form.country);
 
-      await withTimeout(
-        setDoc(doc(db, "users", cred.user.uid), {
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          phone: form.phone ? `${countryData?.dialCode || ""} ${form.phone}`.trim() : "",
-          country: form.country,
-          currency: countryData?.currency || "USD",
-          role: "customer",
-          emailVerified: false,
-          createdAt: new Date().toISOString(),
-        }),
-        8000
-      );
+      await setDoc(doc(db, "users", cred.user.uid), {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone ? `${countryData?.dialCode || ""} ${form.phone}`.trim() : "",
+        country: form.country,
+        currency: countryData?.currency || "USD",
+        role: "customer",
+        emailVerified: false,
+        createdAt: new Date().toISOString(),
+      });
 
       router.push("/");
     } catch (err: any) {

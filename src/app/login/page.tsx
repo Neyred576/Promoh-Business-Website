@@ -12,14 +12,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`${label} timed out.`)), ms)
-    ),
-  ]);
-}
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -36,7 +29,7 @@ export default function LoginPage() {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       try {
-        const userDoc = await withTimeout(getDoc(doc(db, "users", cred.user.uid)), 8000, "Firestore");
+        const userDoc = await getDoc(doc(db, "users", cred.user.uid));
         const role = userDoc.exists() ? userDoc.data().role : "customer";
         if (role === "admin") {
           router.push("/admin/dashboard");

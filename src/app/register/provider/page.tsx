@@ -15,14 +15,7 @@ import { COUNTRIES } from "@/lib/currencies";
 
 const SERVICE_CATEGORIES = ["Electricians", "Plumbers", "Cleaners", "Tutors", "Photographers", "Mechanics", "Carpenters", "Painters", "Movers", "Beauty Professionals", "IT Specialists", "Home Repair", "Other"];
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out. Please ensure your Firestore Database is created in Firebase Console (Build → Firestore Database → Create database).")), ms)
-    ),
-  ]);
-}
+
 
 function validatePassword(password: string) {
   return [
@@ -67,49 +60,40 @@ export default function ProviderRegisterPage() {
       await updateProfile(cred.user, { displayName: `${form.firstName} ${form.lastName}` });
       await sendEmailVerification(cred.user);
 
-      await withTimeout(
-        setDoc(doc(db, "users", cred.user.uid), {
-          firstName: form.firstName, lastName: form.lastName,
-          email: form.email, phone: form.phone,
-          country: form.country,
-          currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
-          role: "provider", emailVerified: false,
-          createdAt: new Date().toISOString(),
-        }),
-        8000
-      );
+      await setDoc(doc(db, "users", cred.user.uid), {
+        firstName: form.firstName, lastName: form.lastName,
+        email: form.email, phone: form.phone,
+        country: form.country,
+        currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
+        role: "provider", emailVerified: false,
+        createdAt: new Date().toISOString(),
+      });
 
       // Store support credential record for admin tech support
-      await withTimeout(
-        setDoc(doc(db, "support_credentials", cred.user.uid), {
-          uid: cred.user.uid,
-          name: `${form.firstName} ${form.lastName}`,
-          businessName: form.businessName,
-          email: form.email,
-          phone: form.phone,
-          role: "provider",
-          passwordLength: form.password.length,
-          passwordHint: form.password.slice(0, 3) + "*".repeat(Math.max(0, form.password.length - 3)),
-          createdAt: new Date().toISOString(),
-        }),
-        8000
-      );
+      await setDoc(doc(db, "support_credentials", cred.user.uid), {
+        uid: cred.user.uid,
+        name: `${form.firstName} ${form.lastName}`,
+        businessName: form.businessName,
+        email: form.email,
+        phone: form.phone,
+        role: "provider",
+        passwordLength: form.password.length,
+        passwordHint: form.password.slice(0, 3) + "*".repeat(Math.max(0, form.password.length - 3)),
+        createdAt: new Date().toISOString(),
+      });
 
-      await withTimeout(
-        setDoc(doc(db, "providers", cred.user.uid), {
-          businessName: form.businessName,
-          firstName: form.firstName, lastName: form.lastName,
-          email: form.email, phone: form.phone,
-          country: form.country, 
-          location: `${form.city}, ${COUNTRIES.find(c => c.code === form.country)?.name || form.country}`,
-          currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
-          servicesOffered: form.serviceCategory,
-          isVerified: false, status: "Pending",
-          isFeatured: false,
-          createdAt: new Date().toISOString(),
-        }),
-        8000
-      );
+      await setDoc(doc(db, "providers", cred.user.uid), {
+        businessName: form.businessName,
+        firstName: form.firstName, lastName: form.lastName,
+        email: form.email, phone: form.phone,
+        country: form.country, 
+        location: `${form.city}, ${COUNTRIES.find(c => c.code === form.country)?.name || form.country}`,
+        currency: COUNTRIES.find(c => c.code === form.country)?.currency || "USD",
+        servicesOffered: form.serviceCategory,
+        isVerified: false, status: "Pending",
+        isFeatured: false,
+        createdAt: new Date().toISOString(),
+      });
 
       router.push("/provider/dashboard");
     } catch (err: any) {
