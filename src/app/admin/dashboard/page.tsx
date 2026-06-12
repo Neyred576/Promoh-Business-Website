@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
 
     // Listen to all reports
     const unsubReports = onSnapshot(collection(db, "reports"), (snap) => {
-      const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const reports = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
       reports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setAllReports(reports);
     });
